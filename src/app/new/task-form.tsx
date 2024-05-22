@@ -19,34 +19,10 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
-import { CloudFog } from 'lucide-react'
-import prisma from '@/lib/prisma'
-import { redirect } from 'next/navigation'
+import { createTask } from '@/actions/task-action'
+import { Task } from '@prisma/client'
 
-export function TaskForm() {
-  async function createTask(formData: FormData) {
-    'use server'
-    const name = formData.get('name')?.toString()
-    const description = formData.get('description')?.toString()
-    const priority = formData.get('priority')?.toString()
-
-    console.log(name, description, priority)
-
-    if (!name || !description || !priority) {
-      return
-    }
-
-    const newTask = await prisma.task.create({
-      data: {
-        name: name,
-        description: description,
-        priority: priority,
-      },
-    })
-    redirect('/')
-    console.log(newTask)
-  }
-
+export function TaskForm({ task }: { task: Task }) {
   return (
     <form action={createTask}>
       <Card className='w-[350px]'>
@@ -60,7 +36,12 @@ export function TaskForm() {
           <div className='grid w-full items-center gap-4'>
             <div className='flex flex-col space-y-1.5'>
               <Label htmlFor='name'>Name</Label>
-              <Input name='name' id='name' placeholder='Name of your task' />
+              <Input
+                name='name'
+                id='name'
+                placeholder='Name of your task'
+                defaultValue={task?.name}
+              />
             </div>
 
             <div className='flex flex-col space-y-1.5'>
@@ -69,11 +50,12 @@ export function TaskForm() {
                 name='description'
                 id='description'
                 placeholder='Description of your task'
+                defaultValue={task?.description || ''}
               />
             </div>
             <div className='flex flex-col space-y-1.5'>
               <Label htmlFor='priority'>Priority</Label>
-              <Select name='priority'>
+              <Select name='priority' defaultValue={task?.priority}>
                 <SelectTrigger id='priority'>
                   <SelectValue placeholder='Select' />
                 </SelectTrigger>
